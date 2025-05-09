@@ -35,15 +35,7 @@ class Circle extends Div {
   public Circle() {
     circle = new Div();
 
-    addClassNames(
-        Display.INLINE_FLEX,
-        AlignItems.CENTER,
-        JustifyContent.CENTER,
-        Vertical.XSMALL,
-        Position.ABSOLUTE,
-        Width.AUTO,
-        "fc-dtrp-circle"
-    );
+    addClassName("fc-dtrp-circle");
 
     add(circle);
   }

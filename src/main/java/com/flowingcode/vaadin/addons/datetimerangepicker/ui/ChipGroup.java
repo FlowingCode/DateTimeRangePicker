@@ -39,6 +39,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.LineHeight;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding.Horizontal;
+import com.vaadin.flow.theme.lumo.LumoUtility.Padding.Left;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding.Vertical;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import java.util.HashSet;
@@ -57,7 +58,7 @@ class ChipGroup extends HorizontalLayout {
         JustifyContent.END,
         Gap.SMALL,
         FlexWrap.WRAP,
-        Horizontal.SMALL,
+        Left.SMALL,
         Vertical.SMALL
     );
   }

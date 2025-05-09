@@ -16,6 +16,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Horizontal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ public class BinderDemo extends VerticalLayout {
   private final Button daysButton = new Button("Show days");
   private final Button timeButton = new Button("Show times range");
   private final Button interButton = new Button("Update intervals");
-  private final Grid<TimeInterval> grid = new Grid<>(TimeInterval.class, false);
   private final List<TimeInterval> intervals = new ArrayList<>();
 
   /*
@@ -50,6 +50,7 @@ public class BinderDemo extends VerticalLayout {
 
     // An object with getter/setter for DateTimeRange
     Pojo pojo = new Pojo();
+
     Binder<Pojo> binder = new Binder<>(Pojo.class);
     binder.forField(addon)
         .bind(Pojo::getDateTimeRange, Pojo::setDateTimeRange);
@@ -64,13 +65,13 @@ public class BinderDemo extends VerticalLayout {
 
     });
 
+    Grid<TimeInterval> grid = new Grid<>(TimeInterval.class, false);
     Grid.Column<TimeInterval> firstCol = grid.addColumn(i -> i.getStartDate().getDayOfWeek()).setHeader("Week day")
         .setSortable(true);
     grid.addColumn(TimeInterval::getStartDate).setHeader("Start")
         .setSortable(true);
     grid.addColumn(TimeInterval::getEndDate).setHeader("End").setSortable(true);
-    // You can use this function to get a Duration formatted as hh:mm:ss
-    grid.addColumn(i -> DateTimeRangePicker.formatDuration(i.getDuration())).setHeader("Duration");
+    grid.addColumn(i -> formatDuration(i.getDuration())).setHeader("Duration");
 
     GridListDataView<TimeInterval> dataView = grid.setItems(intervals);
     dataView.addItemCountChangeListener(c -> firstCol.setFooter("Total: " + c.getItemCount()));
@@ -141,6 +142,14 @@ public class BinderDemo extends VerticalLayout {
     public void setDateTimeRange(DateTimeRange dateTimeRange) {
       this.dateTimeRange = dateTimeRange;
     }
+  }
+
+  private static String formatDuration(Duration duration) {
+    return String.format("%02d:%02d:%02d",
+        duration.toHoursPart(),
+        duration.toMinutesPart(),
+        duration.toSecondsPart()
+    );
   }
 
 

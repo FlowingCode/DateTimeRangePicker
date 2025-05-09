@@ -32,9 +32,6 @@ public class DateTimeRangePickerValidator implements Validator<DateTimeRange> {
 
   private final DateTimeRangePicker model;
 
-  private static final String SUCCESS_COLOR = "var(--lumo-primary-color)";
-  private static final String ERROR_COLOR = "var(--lumo-error-color)";
-
   public DateTimeRangePickerValidator(DateTimeRangePicker model) {
     this.model = model;
     setManualValidation();
@@ -48,73 +45,38 @@ public class DateTimeRangePickerValidator implements Validator<DateTimeRange> {
     model.weekDays.setManualValidation(true);
   }
 
+  // Since a DateTimeRange instance is always valid, checking for its presence is enough
   @Override
   public ValidationResult apply(DateTimeRange data, ValueContext valueContext) {
     ValidationResult result;
-    if (
-        data != null &&
-            dateValidation(data.getStartDate(), data.getEndDate())
-                & timeValidation(data.getStartTime(), data.getEndTime())  //Single & is intentional
-                & daysValidation(data.getWeekDays())
-    ) {
-      result = ValidationResult.ok();
-    } else {
-      result = ValidationResult.error(model.getErrorMessage());
-    }
+    result = data != null ? ValidationResult.ok() : ValidationResult.error(model.getErrorMessage());
 
-    this.model.refreshUI();
     return result;
   }
 
+  // Checks if UI is valid
+  public boolean isValid() {
+    boolean datesOk = dateValidation(model.startDate.getValue(), model.endDate.getValue());
+    boolean daysOk = daysValidation(model.weekDays.getValue());
+    boolean timesOk = timeValidation(model.startTime.getValue(), model.endTime.getValue());
+    this.model.refreshUI(datesOk, daysOk, timesOk);
+    return datesOk && daysOk && timesOk;
+  }
+
   private boolean dateValidation(LocalDate start, LocalDate end) {
-    boolean nullCheck = (start != null && end != null);
-    if (!nullCheck) {
-      model.startDate.setInvalid(false);
-      model.endDate.setInvalid(false);
-    } else {
-      boolean dateCheck = start.isBefore(end);
-      if (!dateCheck) {
-        model.startDate.setInvalid(true);
-        model.endDate.setInvalid(true);
-        model.dateCircle.setColor(ERROR_COLOR);
-      } else {
-        model.startDate.setInvalid(false);
-        model.endDate.setInvalid(false);
-        model.dateCircle.setColor(SUCCESS_COLOR);
-        return true;
-      }
-    }
-    return false;
+    boolean notNull = (start != null && end != null);
+    return notNull && start.isBefore(end);
   }
 
   private boolean timeValidation(LocalTime start, LocalTime end) {
-    boolean nullCheck = (start != null && end != null);
-    if (!nullCheck) {
-      model.startTime.setInvalid(false);
-      model.endTime.setInvalid(false);
-    } else {
-      boolean dateCheck = start.isBefore(end);
-      if (!dateCheck) {
-        model.startTime.setInvalid(true);
-        model.endTime.setInvalid(true);
-        model.timeCircle.setColor(ERROR_COLOR);
-      } else {
-        model.startTime.setInvalid(false);
-        model.endTime.setInvalid(false);
-        model.timeCircle.setColor(SUCCESS_COLOR);
-        return true;
-      }
-    }
-    return false;
+    boolean notNull = (start != null && end != null);
+    return notNull && start.isBefore(end);
   }
 
   private boolean daysValidation(Set<DayOfWeek> weekDays) {
-    boolean check = weekDays != null && !weekDays.isEmpty();
-    if (check) {
-      model.daysCircle.setColor(SUCCESS_COLOR);
-      return true;
-    } else {
-      return false;
-    }
+    boolean notNull = weekDays != null;
+    return notNull && !weekDays.isEmpty();
   }
+
+
 }

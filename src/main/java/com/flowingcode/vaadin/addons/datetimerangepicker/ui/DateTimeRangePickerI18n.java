@@ -54,7 +54,7 @@ public class DateTimeRangePickerI18n implements Serializable {
    * @return date pickers' title or {@code null} if this object is not attached to a {@code DateTimeRangePicker} instance
    */
   public String getDatesTitle() {
-    return component != null ? component.datesTitle.toString() : null;
+    return component != null ? component.datesTitle.getText() : null;
   }
 
   /**
@@ -77,7 +77,7 @@ public class DateTimeRangePickerI18n implements Serializable {
    * @return days picker's title or {@code null} if this object is not attached to a {@code DateTimeRangePicker} instance
    */
   public String getDaysTitle() {
-    return component != null ? component.daysTitle.toString() : null;
+    return component != null ? component.daysTitle.getText() : null;
   }
 
   /**
@@ -100,7 +100,7 @@ public class DateTimeRangePickerI18n implements Serializable {
    * @return time pickers' title or {@code null} if this object is not attached to a {@code DateTimeRangePicker} instance
    */
   public String getTimesTitle() {
-    return component != null ? component.timesTitle.toString() : null;
+    return component != null ? component.timesTitle.getText() : null;
   }
 
   /**
@@ -165,9 +165,19 @@ public class DateTimeRangePickerI18n implements Serializable {
    * @see DateTimeRangePicker#setFirstWeekDay(DayOfWeek)
    */
   public DateTimeRangePickerI18n setDayInitials(List<String> initials) {
+    final List<String> aux;
+    if(initials == null) {
+      aux = List.of();
+    }
+    else if(initials.size() > 7) {
+      aux = initials.subList(0, 8);
+    }
+    else {
+      aux = initials;
+    }
     SerializableRunnable action = () -> {
-      component.daysInitials = initials;
-      component.weekDays.setWeekDaysShort(initials);
+      component.daysInitials = aux;
+      component.weekDays.setWeekDaysShort(aux);
     };
     actions[5] = action;
     if(component != null) action.run();

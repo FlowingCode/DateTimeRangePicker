@@ -48,13 +48,12 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Period;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 /**
- * A component to create <a href="https://en.wikipedia.org/wiki/ISO_8601#Time_intervals">Time Intervals</a> based on date and time constraints
+ * A component to create <a href="https://en.wikipedia.org/wiki/ISO_8601#Time_intervals">time intervals</a> based on date and time constraints
  *
  * @author Izaguirre, Ezequiel
  */
@@ -62,8 +61,11 @@ public class DateTimeRangePicker
     extends CustomField<DateTimeRange> implements HasValidator<DateTimeRange> {
 
   static final String defaultErrorMessage = "Invalid or incomplete fields remaining";
+  private static final String SUCCESS_COLOR = "var(--lumo-primary-color)";
+  private static final String ERROR_COLOR = "var(--lumo-error-color)";
 
   // Mandatory attributes for validation
+  DateTimeRangePickerValidator validator;
   DatePicker startDate;
   DatePicker endDate;
   TimePicker startTime;
@@ -103,7 +105,7 @@ public class DateTimeRangePicker
         Padding.SMALL
     );
 
-    HorizontalLayout rootLayout = new HorizontalLayout();
+    final HorizontalLayout rootLayout = new HorizontalLayout();
     rootLayout.addClassNames(
         Padding.SMALL,
         Width.FULL,
@@ -112,7 +114,7 @@ public class DateTimeRangePicker
         Gap.MEDIUM
     );
 
-    VerticalLayout mainLayout = new VerticalLayout();
+    final VerticalLayout mainLayout = new VerticalLayout();
     dateSelector = getDateSelectors();
     daysSelector = getDaysSelector();
     timeSelector = getTimeSelectors();
@@ -132,24 +134,26 @@ public class DateTimeRangePicker
         Flex.GROW
     );
 
+    validator = new DateTimeRangePickerValidator(this);
+
     mainLayout.add(dateSelector, daysSelector, timeSelector);
     rootLayout.add(verticalLine, mainLayout);
     add(rootLayout);
   }
 
-  void refreshUI() {
-    if (this.startDate.getValue() != null && this.endDate.getValue() != null) {
-      Period distance = Period.between(this.startDate.getValue(), this.endDate.getValue());
-      this.daysDivider.setText(formatPeriod(distance));
-    } else {
-      this.daysDivider.setEmptyText();
-    }
-    if (this.startTime.getValue() != null && this.endTime.getValue() != null) {
-      Duration duration = Duration.between(this.startTime.getValue(), this.endTime.getValue());
-      this.timeDivider.setText(formatDuration(duration));
-    } else {
-      this.timeDivider.setEmptyText();
-    }
+  void refreshUI(boolean datesOk, boolean daysOk, boolean timesOk) {
+    daysDivider.setText(formatDaysSpan(startDate.getValue(), endDate.getValue()));
+    timeDivider.setText(formatTimeSpan(startTime.getValue(), endTime.getValue()));
+
+    startDate.setInvalid(startDate.getValue() != null && endDate.getValue() != null && !datesOk);
+    endDate.setInvalid(startDate.getValue() != null && endDate.getValue() != null && !datesOk);
+    dateCircle.setColor(datesOk ? SUCCESS_COLOR : ERROR_COLOR);
+
+    daysCircle.setColor(daysOk ? SUCCESS_COLOR : ERROR_COLOR);
+
+    startTime.setInvalid(startTime.getValue() != null && endTime.getValue() != null && !timesOk);
+    endTime.setInvalid(startTime.getValue() != null && endTime.getValue() != null && !timesOk);
+    timeCircle.setColor(timesOk ? SUCCESS_COLOR : ERROR_COLOR);
   }
 
   // UI Components
@@ -189,7 +193,6 @@ public class DateTimeRangePicker
     layout.add(headerWrapper, selectorLayout);
 
     return layout;
-
   }
 
   private Component getDaysSelector() {
@@ -224,7 +227,7 @@ public class DateTimeRangePicker
           e.getStyle().setScale("1.15");
         }
     );
-    this.weekDays.addValueChangeListener(ev -> revalidate());
+    this.weekDays.addValueChangeListener(ev -> updateValue());
     this.weekDays.setFirstDayOfWeek(DayOfWeek.SUNDAY);
     this.weekDays.addClassNames(
         AlignSelf.CENTER,
@@ -237,9 +240,9 @@ public class DateTimeRangePicker
     weekendChip.onPress(checked -> {
       if (checked) {
         this.weekDays.setValue(DayOfWeek.SUNDAY, DayOfWeek.SATURDAY);
+        updateValue();
       }
       this.weekDays.setReadOnly(checked);
-      revalidate();
     });
 
     weekdaysChip.onPress(checked -> {
@@ -251,9 +254,9 @@ public class DateTimeRangePicker
             DayOfWeek.THURSDAY,
             DayOfWeek.FRIDAY
         );
+        updateValue();
       }
       this.weekDays.setReadOnly(checked);
-      revalidate();
     });
 
     allDaysChip.onPress(checked -> {
@@ -267,9 +270,9 @@ public class DateTimeRangePicker
             DayOfWeek.SATURDAY,
             DayOfWeek.SUNDAY
         );
+        updateValue();
       }
       this.weekDays.setReadOnly(checked);
-      revalidate();
     });
 
     layout.add(headerLayout, this.weekDays);
@@ -307,13 +310,13 @@ public class DateTimeRangePicker
 
     morningChip.onPress(checked -> {
       if (checked) {
-        LocalTime minDate = this.startTime.getMin() != null ? this.startTime.getMin() : LocalTime.MIN;
-        LocalTime maxDate = this.endTime.getMax() != null ? this.startTime.getMax() : LocalTime.MAX;
-        this.startTime.setValue(minDate);
-        this.endTime.setValue(maxDate.isBefore(LocalTime.NOON) ? maxDate : LocalTime.NOON);
+        LocalTime minTime = this.startTime.getMin() != null ? this.startTime.getMin() : LocalTime.MIN;
+        LocalTime maxTime = this.endTime.getMax() != null ? this.endTime.getMax() : LocalTime.MAX;
+        this.startTime.setValue(minTime);
+        this.endTime.setValue(maxTime.isBefore(LocalTime.NOON) ? maxTime : LocalTime.NOON);
         this.startTime.setReadOnly(true);
         this.endTime.setReadOnly(true);
-        revalidate();
+        updateValue();
       }
       this.startTime.setReadOnly(checked);
       this.endTime.setReadOnly(checked);
@@ -321,12 +324,11 @@ public class DateTimeRangePicker
 
     afterNoonChip.onPress(checked -> {
       if (checked) {
-        LocalTime minDate = this.startTime.getMin() != null ? this.startTime.getMin() : LocalTime.MIN;
-        LocalTime maxDate = this.endTime.getMax() != null ? this.startTime.getMax() : LocalTime.MAX;
-        this.startTime.setValue(minDate.isAfter(LocalTime.NOON) ? minDate : LocalTime.NOON);
-        this.endTime.setValue(maxDate.isBefore(LocalTime.NOON) ? maxDate : LocalTime.NOON);
-        this.endTime.setValue(maxDate);
-        revalidate();
+        LocalTime minTime = this.startTime.getMin() != null ? this.startTime.getMin() : LocalTime.MIN;
+        LocalTime maxTime = this.endTime.getMax() != null ? this.endTime.getMax() : LocalTime.MAX;
+        this.startTime.setValue(minTime.isAfter(LocalTime.NOON) ? minTime : LocalTime.NOON);
+        this.endTime.setValue(maxTime);
+        updateValue();
       }
       this.startTime.setReadOnly(checked);
       this.endTime.setReadOnly(checked);
@@ -334,11 +336,11 @@ public class DateTimeRangePicker
 
     allTimeChip.onPress(checked -> {
       if (checked) {
-        LocalTime minDate = this.startTime.getMin() != null ? this.startTime.getMin() : LocalTime.MIN;
-        LocalTime maxDate = this.endTime.getMax() != null ? this.startTime.getMax() : LocalTime.MAX;
-        this.startTime.setValue(minDate);
-        this.endTime.setValue(maxDate);
-        revalidate();
+        LocalTime minTime = this.startTime.getMin() != null ? this.startTime.getMin() : LocalTime.MIN;
+        LocalTime maxTime = this.endTime.getMax() != null ? this.endTime.getMax() : LocalTime.MAX;
+        this.startTime.setValue(minTime);
+        this.endTime.setValue(maxTime);
+        updateValue();
       }
       this.startTime.setReadOnly(checked);
       this.endTime.setReadOnly(checked);
@@ -362,25 +364,35 @@ public class DateTimeRangePicker
     return layout;
   }
 
-  // Fires a revalidation when data changes
-  private void revalidate() {
-    getElement().executeJs("this.dispatchEvent(new Event('change'))");
-  }
-
-  // Custom field
   @Override
   protected DateTimeRange generateModelValue() {
-    return new DateTimeRange(
-        startDate.getValue(),
-        endDate.getValue(),
-        startTime.getValue(),
-        endTime.getValue(),
-        weekDays.getValue()
-    );
+    boolean isValid = validator.isValid();
+    this.setInvalid(!isValid);
+
+    if(isValid) {
+      return new DateTimeRange(
+          startDate.getValue(),
+          endDate.getValue(),
+          startTime.getValue(),
+          endTime.getValue(),
+          weekDays.getValue()
+      );
+    }
+    else return null;
   }
 
   @Override
   protected void setPresentationValue(DateTimeRange dateTimeRange) {
+    if (dateTimeRange == null) {
+      startDate.clear();
+      endDate.clear();
+      startTime.clear();
+      endTime.clear();
+      weekDays.clear();
+      daysDivider.setEmptyText();
+      timeDivider.setEmptyText();
+      return;
+    }
 
     startDate.setValue(dateTimeRange.getStartDate());
     endDate.setValue(dateTimeRange.getEndDate());
@@ -388,17 +400,14 @@ public class DateTimeRangePicker
     endTime.setValue(dateTimeRange.getEndTime());
     weekDays.setValue(dateTimeRange.getWeekDays());
 
-    daysDivider.setText(formatPeriod(dateTimeRange.getDaysSpan()));
-    Duration timeDuration = dateTimeRange.getDayDuration();
-    timeDivider.setText(formatDuration(timeDuration));
+    daysDivider.setText(formatDaysSpan(dateTimeRange.getStartDate(), dateTimeRange.getEndDate()));
+    timeDivider.setText(formatTimeSpan(dateTimeRange.getStartTime(), dateTimeRange.getEndTime()));
   }
 
   @Override
   public Validator<DateTimeRange> getDefaultValidator() {
-    return new DateTimeRangePickerValidator(this);
+    return validator;
   }
-
-  // api
 
   /**
    * Changes this component's visibility state
@@ -407,7 +416,7 @@ public class DateTimeRangePicker
    */
   @Override
   public void setVisible(boolean visible) {
-    super.setVisible(visible);
+    this.getElement().setVisible(visible);
     this.setDatesVisible(visible);
     this.setDaysVisible(visible);
     this.setTimesVisible(visible);
@@ -611,9 +620,12 @@ public class DateTimeRangePicker
    * @see DateTimeRangePickerI18n
    */
   public void setI18n(DateTimeRangePickerI18n i18n) {
-    i18n.component = this;
-    for(Runnable action : i18n.actions) {
-      if(action != null) action.run();
+    if(i18n != null) {
+      i18n.component = this;
+      for (Runnable action : i18n.actions) {
+        if (action != null)
+          action.run();
+      }
     }
   }
 
@@ -637,16 +649,26 @@ public class DateTimeRangePicker
     this(defaultValue, defaultErrorMessage);
   }
 
-  public static String formatDuration(Duration duration) {
-    return String.format("%02d:%02d:%02d",
-        duration.toHoursPart(),
-        duration.toMinutesPart(),
-        duration.toSecondsPart()
+  private static String formatTimeSpan(LocalTime startTime, LocalTime endTime) {
+    if(startTime == null || endTime == null) return "";
+
+    Duration duration = Duration.between(startTime, endTime);
+    int hours = duration.toHoursPart();
+    int minutes = duration.toMinutesPart();
+    int seconds = duration.toSecondsPart();
+    boolean isNegative = hours < 0 || minutes < 0 || seconds < 0;
+
+    return String.format((isNegative ? "-" : "+") + "%02d:%02d:%02d",
+        isNegative ? Math.abs(hours) : hours,
+        isNegative ? Math.abs(minutes) : minutes,
+        isNegative ? Math.abs(seconds) : seconds
     );
   }
 
-  protected static String formatPeriod(Period period) {
-    return String.format("%dD", period.getDays());
+  private static String formatDaysSpan(LocalDate startDate, LocalDate endDate) {
+    if(startDate == null || endDate == null) return "";
+    long days = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
+    return days >= 0 ? "+" + days : "" + days;
   }
 
 }
