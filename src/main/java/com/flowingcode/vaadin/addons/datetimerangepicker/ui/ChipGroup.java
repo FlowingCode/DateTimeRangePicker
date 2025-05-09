@@ -39,6 +39,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.LineHeight;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding.Horizontal;
+import com.vaadin.flow.theme.lumo.LumoUtility.Padding.Left;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding.Vertical;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import java.util.HashSet;
@@ -50,6 +51,7 @@ class ChipGroup extends HorizontalLayout {
 
   private final Set<Chip> chips = new HashSet<>();
   private Chip checkedChip;
+  private boolean readOnly = false;
 
   public ChipGroup() {
     addClassNames(
@@ -57,7 +59,7 @@ class ChipGroup extends HorizontalLayout {
         JustifyContent.END,
         Gap.SMALL,
         FlexWrap.WRAP,
-        Horizontal.SMALL,
+        Left.SMALL,
         Vertical.SMALL
     );
   }
@@ -72,14 +74,9 @@ class ChipGroup extends HorizontalLayout {
   public Chip addChip(Chip chip) {
     chips.add(chip);
     chip.setParent(this);
+    chip.setReadOnly(readOnly);
     add(chip);
     return chip;
-  }
-
-  public boolean deleteChip(Chip chip) {
-    chip.setParent(null);
-    remove(chip);
-    return chips.remove(chip);
   }
 
   private void onChipChange(Chip chip) {
@@ -96,6 +93,7 @@ class ChipGroup extends HorizontalLayout {
   }
 
   public void setReadOnly(boolean readOnly) {
+    this.readOnly = readOnly;
     chips.forEach(c -> c.setReadOnly(readOnly));
   }
 

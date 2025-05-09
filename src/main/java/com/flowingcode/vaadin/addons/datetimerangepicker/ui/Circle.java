@@ -20,12 +20,6 @@
 package com.flowingcode.vaadin.addons.datetimerangepicker.ui;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding.Vertical;
-import com.vaadin.flow.theme.lumo.LumoUtility.Position;
-import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 
 // Indicator circle
 class Circle extends Div {
@@ -35,15 +29,7 @@ class Circle extends Div {
   public Circle() {
     circle = new Div();
 
-    addClassNames(
-        Display.INLINE_FLEX,
-        AlignItems.CENTER,
-        JustifyContent.CENTER,
-        Vertical.XSMALL,
-        Position.ABSOLUTE,
-        Width.AUTO,
-        "fc-dtrp-circle"
-    );
+    addClassName("fc-dtrp-circle");
 
     add(circle);
   }
