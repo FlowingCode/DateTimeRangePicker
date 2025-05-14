@@ -1,8 +1,8 @@
 /*-
  * #%L
- * Template Add-on
+ * DateTimeRangePicker Add-on
  * %%
- * Copyright (C) 2024 Flowing Code
+ * Copyright (C) 2025 Flowing Code
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,25 @@
  * limitations under the License.
  * #L%
  */
+package com.flowingcode.vaadin.addons.datetimerangepicker.ui;
 
-package com.flowingcode.vaadin.addons.template;
-
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 
-@SuppressWarnings("serial")
-@NpmPackage(value = "@polymer/paper-input", version = "3.2.1")
-@JsModule("@polymer/paper-input/paper-input.js")
-@Tag("paper-input")
-public class TemplateAddon extends Div {}
+// Indicator circle
+class Circle extends Div {
+
+  private final Div circle;
+
+  public Circle() {
+    circle = new Div();
+
+    addClassName("fc-dtrp-circle");
+
+    add(circle);
+  }
+
+  public void setColor(String background) {
+    circle.getStyle().setBackgroundColor(background);
+  }
+
+}

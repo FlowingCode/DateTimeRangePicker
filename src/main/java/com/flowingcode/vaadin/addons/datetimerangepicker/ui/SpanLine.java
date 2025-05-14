@@ -1,8 +1,8 @@
 /*-
  * #%L
- * Template Add-on
+ * DateTimeRangePicker Add-on
  * %%
- * Copyright (C) 2024 Flowing Code
+ * Copyright (C) 2025 Flowing Code
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,30 @@
  * limitations under the License.
  * #L%
  */
+package com.flowingcode.vaadin.addons.datetimerangepicker.ui;
 
-package com.flowingcode.vaadin.addons.template;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Paragraph;
 
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.Route;
+// Horizontal line between pickers
+class SpanLine extends Div {
 
-@SuppressWarnings("serial")
-@Route("")
-public class DemoView extends VerticalLayout implements BeforeEnterObserver {
+  private final Paragraph label = new Paragraph();
 
-  @Override
-  public void beforeEnter(BeforeEnterEvent event) {
-    event.forwardTo(TemplateDemoView.class);
+  public SpanLine() {
+
+    addClassName("fc-dtrp-linespan");
+
+    Div line = new Div();
+
+    add(line, label);
+  }
+
+  public void setText(String text) {
+    this.label.setText(text);
+  }
+
+  public void setEmptyText() {
+    this.label.setText("");
   }
 }
