@@ -1,8 +1,8 @@
 /*-
  * #%L
- * Template Add-on
+ * DateTimeRangePicker Add-on
  * %%
- * Copyright (C) 2024 Flowing Code
+ * Copyright (C) 2025 Flowing Code
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,27 @@
  * limitations under the License.
  * #L%
  */
+package com.flowingcode.vaadin.addons.datetimerangepicker;
 
-package com.flowingcode.vaadin.addons.template;
-
+import com.flowingcode.vaadin.addons.demo.DemoSource;
+import com.flowingcode.vaadin.addons.datetimerangepicker.ui.DateTimeRangePicker;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 
+@PageTitle("Basic")
 @SuppressWarnings("serial")
-@Route("")
-public class DemoView extends VerticalLayout implements BeforeEnterObserver {
+@Route(value = "dtrp/basic", layout = DateTimeRangePickerTabbedView.class)
+@DemoSource
+public class ComponentDemo extends VerticalLayout {
 
-  @Override
-  public void beforeEnter(BeforeEnterEvent event) {
-    event.forwardTo(TemplateDemoView.class);
+  public ComponentDemo() {
+    setSizeFull();
+    addClassNames(AlignItems.CENTER);
+
+    // Component creation
+    DateTimeRangePicker addon = new DateTimeRangePicker();
+    add(addon);
   }
 }
