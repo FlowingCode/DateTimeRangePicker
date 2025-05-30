@@ -17,14 +17,34 @@
  * limitations under the License.
  * #L%
  */
-package com.flowingcode.vaadin.addons;
+package com.flowingcode.vaadin.addons.datetimerangepicker.ui;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.component.html.Paragraph;
 
-public class DemoLayout extends Div implements RouterLayout {
+/**
+ * A simple UI component representing a horizontal line with an optional label.
+ * The line is styled with the "fc-dtrp-linespan" CSS class.
+ * The label text can be set or cleared using the {@link #setText(String)} and {@link #clearText()} methods.
+ */
+class SpanLine extends Div {
 
-  public DemoLayout() {
-    setSizeFull();
+  private final Paragraph label = new Paragraph();
+
+  public SpanLine() {
+
+    addClassName("fc-dtrp-linespan");
+
+    Div line = new Div();
+
+    add(line, label);
+  }
+
+  public void setText(String text) {
+    this.label.setText(text);
+  }
+
+  public void clearText() {
+    this.label.setText(null);
   }
 }
